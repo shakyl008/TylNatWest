@@ -51,7 +51,9 @@ It will need to very rapidly recover from outages, frequent backups of stock pri
 
 #### Regulatory constraints 
 Financial transactions usually have audit requirements
-Speed and scalability - being able to respond quickly and scale on demand - mainly optimizing the database
+
+#### Speed and scalability 
+Being able to respond quickly and scale on demand - mainly optimizing the database
 
 #### Observability 
 Being able to monitor the system live
