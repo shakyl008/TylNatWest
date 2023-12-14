@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LondonStockExchange.Controllers
 {
-    [Route("LondonStockExchange/v1/[controller]")]
+    [Route("lse/v1/stock")]
     //[Authorize(AuthenticationSchemes = "Bearer")]
     [ApiController]
     public class StockController : ControllerBase
@@ -23,7 +23,7 @@ namespace LondonStockExchange.Controllers
             _logger = logger;
         }
 
-        [HttpGet("GetStockValueByTicker/{ticker}")]
+        [HttpGet("{ticker}")]
         public async Task<IActionResult> GetStockValueByTickerAsync(string ticker)
         {
             try
@@ -55,7 +55,7 @@ namespace LondonStockExchange.Controllers
             }
         }
 
-        [HttpGet("GetAllStocks")]
+        [HttpGet("all")]
         public async Task<IActionResult> GetAllStocksAsync()
         {
             try
@@ -75,7 +75,7 @@ namespace LondonStockExchange.Controllers
             }
         }
 
-        [HttpGet("GetStocksByTickerList")]
+        [HttpGet("list")]
         public async Task<IActionResult> GetStocksByTickerListAsync([FromBody] List<string> listOfTickers)
         {
             try
@@ -106,8 +106,8 @@ namespace LondonStockExchange.Controllers
             }
         }
 
-        [HttpPost("AddNewTrade")]
-        public async Task<IActionResult> AddNewTradeAsync([FromBody] List<Trade> trades)
+        [HttpPost("newtrade")]
+        public async Task<IActionResult> AddNewTradesAsync([FromBody] List<Trade> trades)
         {
             try
             {
