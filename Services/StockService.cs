@@ -1,6 +1,7 @@
 ﻿using LondonStockExchange.Models;
 using LondonStockExchange.Repositories;
 using Microsoft.EntityFrameworkCore;
+using static LondonStockExchange.Controllers.StockController;
 
 namespace LondonStockExchange.Services
 {
@@ -12,7 +13,7 @@ namespace LondonStockExchange.Services
 
         public Task<List<Stock>> GetStocksByTickerListAsync(List<string> listOfTickers);
 
-        public Task AddNewTradeAsync(List<Trade> trades);
+        public Task AddNewTradeAsync(List<NewTradeDTO> trades);
     }
     public class StockService : IStockService
     {
@@ -56,14 +57,55 @@ namespace LondonStockExchange.Services
             return stocksFilteredByTicker;
         }
 
-        public async Task AddNewTradeAsync(List<Trade> trades)
+        public async Task AddNewTradeAsync(List<NewTradeDTO> trades)
         {
             // input check
             if (trades == null)
             {
                 throw new ArgumentNullException();
             }
-            await _stockRepository.AddNewTradeAsync(trades);
+
+            // convert trade dto to trades
+            var listOfTrades = new List<Trade>();
+
+
+            await _stockRepository.AddNewTradeAsync(listOfTrades);
+        }
+
+        internal async Task<List<Trade>> Convert_NewTradeDTOs_To_ListOfTrade(List<NewTradeDTO> newTradeDTO_List)
+        {
+            List<Trade> newTrades = new List<Trade>();
+
+            Trade TradeDTO_to_Trade(NewTradeDTO newTradeDTO)
+            {
+                Trade newTrade = new Trade()
+                {
+                    TradeId = newTradeDTO.TradeId,
+                    NumberOfShares = newTradeDTO.NumberOfShares,
+                    BrokerId = newTradeDTO.BrokerId,
+                    StockTicker = newTradeDTO.StockTicker,
+                    TradePrice = newTradeDTO.TradePrice,
+                    TimeOfTrade = newTradeDTO.TimeOfTrade,
+                };
+                return newTrade;
+            }
+
+            if(newTradeDTO_List.Count > 1000)
+            {
+                Parallel.ForEach(newTradeDTO_List, newTradeDTO =>
+                {
+                    newTrades.Add(TradeDTO_to_Trade(newTradeDTO));
+                });
+            }
+            else
+            {
+                foreach (var tradeDTO in newTradeDTO_List)
+                {
+                    newTrades.Add(TradeDTO_to_Trade(tradeDTO));
+                }
+            }
+
+            return newTrades;
         }
     }
 }

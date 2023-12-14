@@ -6,24 +6,22 @@ namespace LondonStockExchange.Models
     public class Trade
     {
         [Key]
-        [MinLength(1)]
+        [Required(ErrorMessage = "TradeId is required.")]
         public string TradeId { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "NumberOfShares is required.")]
         public decimal NumberOfShares { get; set; }
 
-        [Required]
-        [MinLength(1)]
+        [Required(ErrorMessage = "BrokerId is required")]
         public string BrokerId { get; set; }
 
-        [Required]
-        [MinLength(1)]
+        [Required(ErrorMessage = "StockTicker is required")]
         public string StockTicker { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "TradePrice is required")]
         public decimal TradePrice { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "TimeOfTrade is required")]
         public DateTime TimeOfTrade { get; set; }
 
         // navigation property for lazy loading

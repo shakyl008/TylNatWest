@@ -3,6 +3,7 @@ using LondonStockExchange.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.Data.Common;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -79,6 +80,11 @@ namespace LondonStockExchange.Controllers
         [HttpGet("list")]
         public async Task<IActionResult> GetStocksByTickerListAsync([FromBody] List<string> listOfTickers)
         {
+            // input validation
+            if(listOfTickers == null || listOfTickers.Count == 0)
+            {
+                return BadRequest(new {message = "List of tickers cannot be empty"});
+            }
             try
             {
                 var stocks = await _stockService.GetStocksByTickerListAsync(listOfTickers);
@@ -108,8 +114,13 @@ namespace LondonStockExchange.Controllers
         }
 
         [HttpPost("newtrade")]
-        public async Task<IActionResult> AddNewTradesAsync([FromBody] List<Trade> trades)
+        public async Task<IActionResult> AddNewTradesAsync([FromBody] List<NewTradeDTO> trades)
         {
+            // validate input
+            if(!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             try
             {
                 await _stockService.AddNewTradeAsync(trades);
@@ -133,6 +144,30 @@ namespace LondonStockExchange.Controllers
                 _logger.LogError(ex, "Error occurred in AddNewTradesAsync trying to add trades: {trades}", trades);
                 return StatusCode(500, "An error occurred while processing your request.");
             }
+        }
+
+        public class NewTradeDTO
+        {
+            [Key]
+            [MinLength(1)]
+            public string TradeId { get; set; }
+
+            [Required]
+            public decimal NumberOfShares { get; set; }
+
+            [Required]
+            [MinLength(1)]
+            public string BrokerId { get; set; }
+
+            [Required]
+            [MinLength(1)]
+            public string StockTicker { get; set; }
+
+            [Required]
+            public decimal TradePrice { get; set; }
+
+            [Required]
+            public DateTime TimeOfTrade { get; set; }
         }
     }
 }

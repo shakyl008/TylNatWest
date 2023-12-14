@@ -117,19 +117,26 @@ namespace LondonStockExchange.Repositories
             }
             try
             {
+                // write to database
+                await _dbContext.Transactions.AddRangeAsync(trades);
+
                 // sort and organise the list of Trades to extract the stocks to be updated
                 var orderedAndGroupedTrades = trades.OrderByDescending(trade => trade.TimeOfTrade).GroupBy(trade => trade.StockTicker);
 
                 // trades can contain multiple trade of the same stock, I want the latest value of the stock price
-                var latestStocks = orderedAndGroupedTrades.Select(grp => grp.First()._Stock).ToList();
-
-                // write to database
-                foreach (var trade in trades)
+                List<Stock> latestStocks = new List<Stock>();
+                foreach (var groupedTrades in orderedAndGroupedTrades)
                 {
-                    _dbContext.Entry(trade._Stock).State = EntityState.Detached;
+                    var stock = new Stock()
+                    {
+                        Ticker = groupedTrades.First().StockTicker,
+                        TradePrice = groupedTrades.First().TradePrice,
+                    };
+                    latestStocks.Add(stock);
                 }
-                await _dbContext.Transactions.AddRangeAsync(trades);
+
                 _dbContext.Stocks.UpdateRange(latestStocks);
+
                 await _dbContext.SaveChangesAsync();
             }
             catch (DbUpdateException ex)
