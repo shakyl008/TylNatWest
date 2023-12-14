@@ -3,6 +3,7 @@ using LondonStockExchange.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Data.Common;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -38,7 +39,7 @@ namespace LondonStockExchange.Controllers
                     return Ok(stock);
                 }
             }
-            catch (DbUpdateException ex)
+            catch (DbException ex)
             {
                 // error for database
                 return StatusCode(500, ex.Message);
@@ -63,7 +64,7 @@ namespace LondonStockExchange.Controllers
                 var allStocks = await _stockService.GetAllStocksAsync();
                 return Ok(allStocks);
             }
-            catch (DbUpdateException ex)
+            catch (DbException ex)
             {
                 // exceptions are allowed to bubble up and caught at controller layer
                 return StatusCode(500, ex.Message);
@@ -90,7 +91,7 @@ namespace LondonStockExchange.Controllers
                     return Ok(stocks);
                 }
             }
-            catch (DbUpdateException ex)
+            catch (DbException ex)
             {
                 // exceptions are allowed to bubble up and caught at controller layer
                 return StatusCode(500, ex.Message);
@@ -129,7 +130,7 @@ namespace LondonStockExchange.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred in AddNewTradeAsync trying to add trades: {trades}", trades);
+                _logger.LogError(ex, "Error occurred in AddNewTradesAsync trying to add trades: {trades}", trades);
                 return StatusCode(500, "An error occurred while processing your request.");
             }
         }

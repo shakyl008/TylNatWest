@@ -1,5 +1,6 @@
 ﻿using LondonStockExchange.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Data.Common;
 
 namespace LondonStockExchange.Repositories
 {
@@ -42,13 +43,10 @@ namespace LondonStockExchange.Repositories
                 return stockWithMatchingTicker;
 
             }
-            catch (DbUpdateException ex)
+            catch (DbException ex)
             {
-                // transient errors
-                // the exception handlding would be done by Polly in a production scenario
-                // for now just throwing the exception up the call stack
-                _logger.LogError(ex, "Database related error occured when trying to get stock with {ticker}", ticker);
-                throw new DbUpdateException(message: "There was an issue with the database, please again later.", ex);
+                _logger.LogError(ex, "Transient database error occurred when trying to retrieve stock with ticker: {ticker}.", ticker);
+                throw new Exception(message: $"There was a transient issue with the database while retrieving stock for ticker '{ticker}'. Please try again later.", innerException: ex);
             }
             catch (InvalidOperationException ex)
             {
@@ -69,10 +67,10 @@ namespace LondonStockExchange.Repositories
 
                 return allStocks;
             }
-            catch (DbUpdateException ex)
+            catch (DbException ex)
             {
                 _logger.LogError("Failed to run GetAllStocksAsync(), see exception: {message}", ex.Message);
-                throw new DbUpdateException(message: "There was an issue with the database, please again later.", ex);
+                throw new Exception(message: "There was an issue with the database, please again later.", ex);
             }
         }
 
@@ -91,10 +89,10 @@ namespace LondonStockExchange.Repositories
 
                 return stocksMatchingTicker;
             }
-            catch (DbUpdateException ex)
+            catch (DbException ex)
             {
                 _logger.LogError("Failed to run GetStocksByTickerListAsync(), see exception: {message}", ex.Message);
-                throw new DbUpdateException(message: "There was an issue with the database, please again later.", ex);
+                throw new Exception(message: "There was an issue with the database, please again later.", ex);
             }
             catch (InvalidOperationException ex)
             {
@@ -139,7 +137,7 @@ namespace LondonStockExchange.Repositories
                 // transient errors
                 // the exception handlding would be done by Polly in a production scenario
                 // for now just throwing the exception up the call stack
-                _logger.LogError(ex, "Database related error occured when call AddNewTradeAsync() for {trades}", trades);
+                _logger.LogError(ex, "Database related error occured when call AddNewTradesAsync() for {trades}", trades);
                 throw new DbUpdateException(message: "And error occured in trying to add to the database, please again later.", ex);
             }
             catch (InvalidOperationException ex)
